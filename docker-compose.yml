@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  web:
+    image: registry-docker.moonstar-x.dev/webpep/web-frontend:latest
+    restart: unless-stopped
+    ports:
+      - 20000:3000
+    depends_on:
+      db:
+        condition: service_healthy
+      datamining_api:
+        condition: service_started
+    environment:
+      - TZ=America/Guayaquil
+      - DATAMINING_API_URL=http://datamining_api:8080
+      - NEO4J_DB_URI=bolt://db:7687
+
+  db:
+    image: registry-docker.moonstar-x.dev/webpep/neo4j-db:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Guayaquil
+      - NEO4J_AUTH=none
+
+  datamining_api:
+    image: registry-docker.moonstar-x.dev/webpep/datamining-api:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - TZ=America/Guayaquil
+      - NEO4J_DB_URI=bolt://db:7687

@@ -13,9 +13,8 @@ services:
         condition: service_started
     environment:
       - TZ=America/Guayaquil
-      - NEXT_APP_DATAMINING_API_URL=http://datamining_api:8080
-      - NEXT_APP_NEO4J_DB_URI=bolt://db:7687
-      - NEXT_APP_WEBSITE_URL=https://webpep.moonstar-x.dev
+      - DATAMINING_API_URL=http://datamining_api:8080
+      - NEO4J_DB_URI=bolt://db:7687
 
   db:
     image: registry-docker.moonstar-x.dev/webpep/neo4j-db:latest

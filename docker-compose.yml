@@ -15,6 +15,7 @@ services:
       - TZ=America/Guayaquil
       - DATAMINING_API_URL=http://datamining_api:8080
       - NEO4J_DB_URI=bolt://db:7687
+      - SERVER_DOWNLOADS_URL=http://static_file_server:8080
 
   db:
     image: code.moonstar-x.dev/webpep/neo4j-db:latest

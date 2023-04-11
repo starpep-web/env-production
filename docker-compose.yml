@@ -32,3 +32,11 @@ services:
     environment:
       - TZ=America/Guayaquil
       - NEO4J_DB_URI=bolt://db:7687
+
+  static_file_server:
+    image: code.moonstar-x.dev/webpep/static-file-server:latest
+    restart: unless-stopped
+    ports:
+      - 20020:8080
+    environment:
+      - TZ=America/Guayaquil

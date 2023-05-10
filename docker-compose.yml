@@ -9,11 +9,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      datamining_api:
+      python_rest_api:
         condition: service_started
     environment:
       - TZ=America/Guayaquil
-      - DATAMINING_API_URL=http://datamining_api:8080
+      - PYTHON_REST_API_URL=http://python_rest_api:8080
       - NEO4J_DB_URI=bolt://db:7687
       - SERVER_DOWNLOADS_URL=http://static_file_server:8080
 
@@ -24,8 +24,8 @@ services:
       - TZ=America/Guayaquil
       - NEO4J_AUTH=none
 
-  datamining_api:
-    image: code.moonstar-x.dev/webpep/datamining-api:latest
+  python_rest_api:
+    image: code.moonstar-x.dev/webpep/python-rest-api:latest
     restart: unless-stopped
     depends_on:
       db:

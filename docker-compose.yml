@@ -1,6 +1,32 @@
 version: "3.9"
 
 services:
+  db:
+    image: code.moonstar-x.dev/webpep/neo4j-db:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Guayaquil
+      - NEO4J_AUTH=none
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      - TZ=America/Guayaquil
+
+  python_rest_api:
+    image: code.moonstar-x.dev/webpep/python-rest-api:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_started
+    environment:
+      - TZ=America/Guayaquil
+      - NEO4J_DB_URI=bolt://db:7687
+      - REDIS_URI=redis://cache:6379
+
   web:
     image: code.moonstar-x.dev/webpep/web-frontend:latest
     restart: unless-stopped
@@ -16,23 +42,6 @@ services:
       - PYTHON_REST_API_URL=http://python_rest_api:8080
       - NEO4J_DB_URI=bolt://db:7687
       - SERVER_DOWNLOADS_URL=http://static_file_server:8080
-
-  db:
-    image: code.moonstar-x.dev/webpep/neo4j-db:latest
-    restart: unless-stopped
-    environment:
-      - TZ=America/Guayaquil
-      - NEO4J_AUTH=none
-
-  python_rest_api:
-    image: code.moonstar-x.dev/webpep/python-rest-api:latest
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      - TZ=America/Guayaquil
-      - NEO4J_DB_URI=bolt://db:7687
 
   static_file_server:
     image: code.moonstar-x.dev/webpep/static-file-server:latest

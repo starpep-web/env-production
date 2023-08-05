@@ -48,5 +48,7 @@ services:
     restart: unless-stopped
     ports:
       - 20020:8080
+    volumes:
+      - ./static-files-assets/files:/files
     environment:
       - TZ=America/Guayaquil

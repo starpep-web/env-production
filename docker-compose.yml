@@ -49,6 +49,6 @@ services:
     ports:
       - 20020:8080
     volumes:
-      - ./static-files-assets/files:/files
+      - ./static-files-assets/files:/files:ro
     environment:
       - TZ=America/Guayaquil

@@ -50,5 +50,6 @@ services:
       - 20020:8080
     volumes:
       - ./static-files-assets/files:/files:ro
+      - /media/sata_2tb/Webpep-Temp:/tmp/files
     environment:
       - TZ=America/Guayaquil

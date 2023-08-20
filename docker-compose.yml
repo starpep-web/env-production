@@ -22,6 +22,9 @@ services:
         condition: service_healthy
       cache:
         condition: service_started
+    volumes:
+      - ./static-files-assets/files:/opt/files:ro
+      - /media/sata_2tb/Webpep-Temp:/tmp/files
     environment:
       - TZ=America/Guayaquil
       - NEO4J_DB_URI=bolt://db:7687
@@ -50,6 +53,6 @@ services:
       - 20020:8080
     volumes:
       - ./static-files-assets/files:/files:ro
-      - /media/sata_2tb/Webpep-Temp:/tmp/files
+      - /media/sata_2tb/Webpep-Temp:/tmp/files:ro
     environment:
       - TZ=America/Guayaquil

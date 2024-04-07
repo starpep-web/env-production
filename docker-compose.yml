@@ -1,18 +1,16 @@
-version: "3.9"
-
 services:
   db:
     image: code.moonstar-x.dev/webpep/neo4j-db:latest
     restart: unless-stopped
     environment:
-      - TZ=America/Guayaquil
-      - NEO4J_AUTH=none
+      TZ: America/Guayaquil
+      NEO4J_AUTH: none
 
   cache:
     image: redis:7-alpine
     restart: unless-stopped
     environment:
-      - TZ=America/Guayaquil
+      TZ: America/Guayaquil
 
   python_rest_api:
     image: code.moonstar-x.dev/webpep/python-rest-api:latest
@@ -26,33 +24,57 @@ services:
       - ./static-files-assets/files:/opt/files:ro
       - /media/sata_2tb/Webpep-Temp:/tmp/files
     environment:
-      - TZ=America/Guayaquil
-      - NEO4J_DB_URI=bolt://db:7687
-      - REDIS_URI=redis://cache:6379
+      TZ: America/Guayaquil
+      NEO4J_DB_URI: bolt://db:7687
+      REDIS_URI: redis://cache:6379
 
   web:
     image: code.moonstar-x.dev/webpep/web-frontend:latest
     restart: unless-stopped
-    ports:
-      - 20000:3000
+    networks:
+      default:
+      proxy_external:
+        aliases:
+          - webpep
     depends_on:
       db:
         condition: service_healthy
       python_rest_api:
         condition: service_started
     environment:
-      - TZ=America/Guayaquil
-      - PYTHON_REST_API_URL=http://python_rest_api:8080
-      - NEO4J_DB_URI=bolt://db:7687
-      - SERVER_DOWNLOADS_URL=http://static_file_server:8080
+      TZ: America/Guayaquil
+      PYTHON_REST_API_URL: http://python_rest_api:8080
+      NEO4J_DB_URI: bolt://db:7687
+      SERVER_DOWNLOADS_URL: http://static_file_server:8080
+    labels:
+      traefik.enable: true
+      traefik.docker.network: proxy_external
+      traefik.http.routers.webpep.rule: Host(`webpep.moonstar-x.dev`)
+      traefik.http.routers.webpep.entrypoints: public
+      traefik.http.routers.webpep.service: webpep@docker
+      traefik.http.services.webpep.loadbalancer.server.port: 3000
 
   static_file_server:
     image: code.moonstar-x.dev/webpep/static-file-server:latest
     restart: unless-stopped
-    ports:
-      - 20020:8080
+    networks:
+      default:
+      proxy_external:
+        aliases:
+          - webpep-dl
     volumes:
       - ./static-files-assets/files:/files:ro
       - /media/sata_2tb/Webpep-Temp:/tmp/files:ro
     environment:
-      - TZ=America/Guayaquil
+      TZ: America/Guayaquil
+    labels:
+      traefik.enable: true
+      traefik.docker.network: proxy_external
+      traefik.http.routers.webpep-dl.rule: Host(`webpep-dl.moonstar-x.dev`)
+      traefik.http.routers.webpep-dl.entrypoints: public
+      traefik.http.routers.webpep-dl.service: webpep-dl@docker
+      traefik.http.services.webpep-dl.loadbalancer.server.port: 8080
+
+networks:
+  proxy_external:
+    external: true

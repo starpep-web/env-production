@@ -1,33 +1,78 @@
-# docker-compose-stack
+# Environment - Production
 
-A Docker Compose stack to deploy this application.
+This repository contains a Docker Compose environment to spin-up the complete application stack in a production environment.
+
+For the `files` container, you'll need to acquire the static assets to serve, so make sure to check the [assets](https://github.com/starpep-web/assets) repo for more information on how to acquire those files.
+
+The services are exposed through a [Traefik](https://traefik.io/traefik/) reverse proxy and served through a [Cloudflare Tunnel](https://www.cloudflare.com) to avoid having to open any ports, these services are provided by the `proxy` and `tunnel` containers respectively.
+Feel free to edit or remove these containers if you wish to deploy this application in a different environment.
 
 ## Requirements
 
-In order to deploy the full application stack you need to have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed in your machine.
+In order to develop for this repository you need:
 
-## Running
+* [Docker](https://www.docker.com/products/docker-desktop/)
+* A [Cloudflare](https://www.cloudflare.com) account to use their tunneling service.
 
-Clone this repository:
+## Configuration
 
-```text
-git clone https://github.com/WebPeptide/docker-compose-stack
+First, clone this repository:
+
+```bash
+git clone https://github.com/starpep-web/env-production
 ```
 
-And start the stack:
+Create an `.env` file with the following contents:
 
 ```text
-docker-compose up -d
+TIMEZONE=America/Guayaquil
+
+CLOUDFLARE_TUNNEL_TOKEN=
+
+DOMAIN_PROXY=
+DOMAIN_FILES_SERVER=
+DOMAIN_CMS=
+DOMAIN_WEB=
+
+ASSETS_FILES_LOCATION=
+ASSETS_TEMP_ARTIFACTS_LOCATION=
+
+CMS_APP_KEYS=
+CMS_API_TOKEN_SALT=
+CMS_ADMIN_JWT_TOKEN=
+CMS_TRANSFER_TOKEN_SALT=
+CMS_JWT_SECRET=
+
+WEB_PUBLIC_URL=
+WEB_PUBLIC_ASSETS_URL
+WEB_CMS_TOKEN=
+WEB_CMS_URL=
 ```
 
-Or with:
+| **Variable**                     | **Description**                                                                                                                                                                                                     | **Example Value**               |
+|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
+| `TIMEZONE`                       | The UNIX timezone to use across services.                                                                                                                                                                           | `America/Guayaquil`             |
+| `CLOUDFLARE_TUNNEL_TOKEN`        | The Cloudflare tunnel token acquired when creating a new tunnel in [Zero Trust Dashboard](http://one.dash.cloudflare.com).                                                                                          | `JWT_TOKEN_HERE`                |
+| `DOMAIN_PROXY`                   | The domain from which the Traefik proxy dashboard is accessible from.                                                                                                                                               | `proxy.starpepweb.com`          |
+| `DOMAIN_FILES_SERVER`            | The domain from which the `static-file-server` service is accessible from.                                                                                                                                          | `dl.starpepweb.com`             |
+| `DOMAIN_CMS`                     | The domain from which the Strapi CMS is accessible from.                                                                                                                                                            | `cms.starpepweb.com`            |
+| `DOMAIN_WEB`                     | The domain from which the main application is accessible from.                                                                                                                                                      | `starpepweb.com`                |
+| `ASSETS_FILES_LOCATION`          | The absolute path in the host machine where the [assets](https://github.com/starpep-web/assets) are located.                                                                                                        | `/home/user/assets/files`       |
+| `ASSETS_TEMP_ARTIFACTS_LOCATION` | The absolute path in the host machine where the artifacts (for example, search exports) are located.                                                                                                                | `/home/user/assets/artifacts`   |
+| `CMS_APP_KEYS`                   | The app keys used by Strapi. You can make up these secrets yourself.                                                                                                                                                | `"toBeModified1,toBeModified2"` |
+| `CMS_API_TOKEN_SALT`             | The API token salt used by Strapi. You can make up this secret yourself.                                                                                                                                            | `tobemodified`                  |
+| `CMS_ADMIN_JWT_TOKEN`            | The admin JWT token used by Strapi. You can make up this secret yourself.                                                                                                                                           | `tobemodified`                  |
+| `CMS_TRANSFER_TOKEN_SALT`        | The transfer token salt used by Strapi. You can make up this secret yourself.                                                                                                                                       | `tobemodified`                  |
+| `CMS_JWT_SECRET`                 | The JWT secret used by Strapi. You can make up this secret yourself.                                                                                                                                                | `tobemodified`                  |
+| `WEB_PUBLIC_URL`                 | The public URL from which the web application is accessible from.                                                                                                                                                   | `https://starpepweb.com`        |
+| `WEB_PUBLIC_ASSETS_URL`          | The public URL from which the `static-file-server` service is accessible from.                                                                                                                                      | `https://dl.starpepweb.com`     |
+| `WEB_CMS_TOKEN`                  | The Strapi token used to query the GraphQL CMS service. Check the CMS's [first time setup](https://github.com/starpep-web/web-cms?tab=readme-ov-file#first-time-setup) for more information on how to acquire this. | `JWT_TOKEN_HERE`                |
+| `WEB_CMS_URL`                    | The public URL from which the CMS is accessible from.                                                                                                                                                               | `https://cms.starpepweb.com`    |
 
-```text
+Start the environment:
+
+```bash
 docker compose up -d
 ```
 
-> Both commands depends on the version of Docker Compose that you have installed, both do exactly the same thing.
-
-You should now have the web application exposed on port 20000 available at http://localhost:20000
-
-Both the datamining API and the database aren't exposed to the host machine and are only accessible by the services inside the stack.
+And that's it, the application will now be up and served by the reverse proxy.

@@ -1,0 +1,11 @@
+name: On Push (Main)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Application Stack
+    uses: ./.github/workflows/callable-deploy.yml

@@ -1,0 +1,17 @@
+name: Deploy Application Stack
+
+on:
+  repository_dispatch:
+    types:
+      - deploy
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  deploy:
+    name: Deploy Application Stack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Placeholder
+        run: echo "DEPLOY"

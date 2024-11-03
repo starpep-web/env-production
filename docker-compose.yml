@@ -1,80 +1,146 @@
 services:
-  db:
-    image: code.moonstar-x.dev/webpep/neo4j-db:latest
+  neo4j:
+    image: ghcr.io/starpep-web/neo4j-db:latest
     restart: unless-stopped
     environment:
-      TZ: America/Guayaquil
+      TZ: ${TIMEZONE}
       NEO4J_AUTH: none
 
-  cache:
-    image: redis:7-alpine
+  redis:
+    image: redis:7.4.1-alpine
     restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - ./data-redis:/data
     environment:
-      TZ: America/Guayaquil
+      TZ: ${TIMEZONE}
 
-  python_rest_api:
-    image: code.moonstar-x.dev/webpep/python-rest-api:latest
+  tunnel:
+    image: cloudflare/cloudflared:2024.10.1
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TZ: ${TIMEZONE}
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+
+  proxy:
+    image: traefik:v3.2
     restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
-      cache:
-        condition: service_started
+      - tunnel
+    ports:
+      - "80:8000"
     volumes:
-      - ./static-files-assets/files:/opt/files:ro
-      - /media/sata_2tb/Webpep-Temp:/tmp/files
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yaml
     environment:
-      TZ: America/Guayaquil
-      NEO4J_DB_URI: bolt://db:7687
-      REDIS_URI: redis://cache:6379
+      TZ: ${TIMEZONE}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.traefik.rule: Host(`${DOMAIN_PROXY}`)
+      traefik.http.routers.traefik.entrypoints: tunnel
+      traefik.http.routers.traefik.service: traefik@docker
+      traefik.http.services.traefik.loadbalancer.server.port: 8080
+
+  api_bio:
+    image: ghcr.io/starpep-web/api-bio:latest
+    restart: unless-stopped
+    depends_on:
+      - neo4j
+      - redis
+    volumes:
+      - ${ASSETS_FILES_LOCATION}:/opt/files:ro
+      - ${ASSETS_TEMP_ARTIFACTS_LOCATION}:/tmp/files
+    environment:
+      TZ: ${TIMEZONE}
+      REDIS_URI: redis://redis:6379
+      NEO4J_DB_URI: bolt://neo4j:7687
+      ASSETS_LOCATION: /opt/files
+      TEMP_ARTIFACTS_LOCATION: /tmp/files
+
+  api_service:
+    image: ghcr.io/starpep-web/api-service:latest
+    restart: unless-stopped
+    depends_on:
+      - neo4j
+    environment:
+      TZ: ${TIMEZONE}
+      NEO4J_DB_URI: bolt://neo4j:7687
+
+  cron:
+    image: ghcr.io/starpep-web/cron:latest
+    restart: unless-stopped
+    depends_on:
+      - redis
+    volumes:
+      - ${ASSETS_TEMP_ARTIFACTS_LOCATION}:/tmp/files
+    environment:
+      TZ: ${TIMEZONE}
+      REDIS_URI: redis://redis:6379
+      TEMP_ARTIFACTS_LOCATION: /tmp/files
+
+  files:
+    image: ghcr.io/starpep-web/static-file-server:latest
+    restart: unless-stopped
+    depends_on:
+      - proxy
+    volumes:
+      - ${ASSETS_FILES_LOCATION}:/opt/files:ro
+      - ${ASSETS_TEMP_ARTIFACTS_LOCATION}:/tmp/files:ro
+    environment:
+      TZ: ${TIMEZONE}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.files.rule: Host(`${DOMAIN_FILES_SERVER}`)
+      traefik.http.routers.files.entrypoints: tunnel
+      traefik.http.routers.files.service: files@docker
+      traefik.http.services.files.loadbalancer.server.port: 8080
+
+  cms:
+    image: ghcr.io/starpep-web/web-cms:latest
+    restart: unless-stopped
+    depends_on:
+      - proxy
+    volumes:
+      - ./data-cms:/opt/data
+    environment:
+      TZ: ${TIMEZONE}
+      APP_KEYS: ${CMS_APP_KEYS}
+      API_TOKEN_SALT: ${CMS_API_TOKEN_SALT}
+      ADMIN_JWT_TOKEN: ${CMS_ADMIN_JWT_TOKEN}
+      TRANSFER_TOKEN_SALT: ${CMS_TRANSFER_TOKEN_SALT}
+      JWT_SECRET: ${CMS_JWT_SECRET}
+      DATABASE_CLIENT: sqlite
+      DATABASE_FILENAME: /opt/data/data.db
+    labels:
+      traefik.enable: true
+      traefik.http.routers.cms.rule: Host(`${DOMAIN_CMS}`)
+      traefik.http.routers.cms.entrypoints: tunnel
+      traefik.http.routers.cms.service: cms@docker
+      traefik.http.services.cms.loadbalancer.server.port: 1337
 
   web:
-    image: code.moonstar-x.dev/webpep/web-frontend:latest
+    image: ghcr.io/starpep-web/web-frontend:latest
     restart: unless-stopped
-    networks:
-      default:
-      proxy_external:
-        aliases:
-          - webpep
     depends_on:
-      db:
-        condition: service_healthy
-      python_rest_api:
-        condition: service_started
+      - proxy
+      - api_bio
+      - api_service
+      - files
+      - cms
     environment:
-      TZ: America/Guayaquil
-      PYTHON_REST_API_URL: http://python_rest_api:8080
-      NEO4J_DB_URI: bolt://db:7687
-      SERVER_DOWNLOADS_URL: http://static_file_server:8080
+      TZ: ${TIMEZONE}
+      API_URL: http://api_service:4000
+      BIO_API_URL: http://api_bio:8000
+      LOCAL_DOWNLOADS_URL: http://files:8080
+      NEXT_PUBLIC_URL: ${WEB_PUBLIC_URL}
+      NEXT_PUBLIC_DOWNLOADS_URL: ${WEB_PUBLIC_ASSETS_URL}
+      NEXT_REVALIDATE_TIME: 3600
+      STRAPI_API_TOKEN: ${WEB_CMS_TOKEN}
+      NEXT_PUBLIC_STRAPI_URL: ${WEB_CMS_URL}
     labels:
       traefik.enable: true
-      traefik.docker.network: proxy_external
-      traefik.http.routers.webpep.rule: Host(`webpep.moonstar-x.dev`)
-      traefik.http.routers.webpep.entrypoints: public
-      traefik.http.routers.webpep.service: webpep@docker
-      traefik.http.services.webpep.loadbalancer.server.port: 3000
-
-  static_file_server:
-    image: code.moonstar-x.dev/webpep/static-file-server:latest
-    restart: unless-stopped
-    networks:
-      default:
-      proxy_external:
-        aliases:
-          - webpep-dl
-    volumes:
-      - ./static-files-assets/files:/files:ro
-      - /media/sata_2tb/Webpep-Temp:/tmp/files:ro
-    environment:
-      TZ: America/Guayaquil
-    labels:
-      traefik.enable: true
-      traefik.docker.network: proxy_external
-      traefik.http.routers.webpep-dl.rule: Host(`webpep-dl.moonstar-x.dev`)
-      traefik.http.routers.webpep-dl.entrypoints: public
-      traefik.http.routers.webpep-dl.service: webpep-dl@docker
-      traefik.http.services.webpep-dl.loadbalancer.server.port: 8080
-
-networks:
-  proxy_external:
-    external: true
+      traefik.http.routers.web.rule: Host(`${DOMAIN_WEB}`)
+      traefik.http.routers.web.entrypoints: tunnel
+      traefik.http.routers.web.service: web@docker
+      traefik.http.services.web.loadbalancer.server.port: 3000

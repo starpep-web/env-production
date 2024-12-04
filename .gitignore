@@ -1,2 +1,5 @@
 assets/
 *.env
+
+data-redis/
+data-cms/

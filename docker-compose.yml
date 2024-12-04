@@ -102,7 +102,8 @@ services:
     depends_on:
       - proxy
     volumes:
-      - ./data-cms:/opt/data
+      - ./data-cms/db:/opt/data
+      - ./data-cms/public:/opt/app/public
     environment:
       TZ: ${TIMEZONE}
       APP_KEYS: ${CMS_APP_KEYS}

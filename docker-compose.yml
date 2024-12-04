@@ -85,7 +85,7 @@ services:
     depends_on:
       - proxy
     volumes:
-      - ${ASSETS_FILES_LOCATION}:/opt/files:ro
+      - ${ASSETS_FILES_LOCATION}:/files:ro
       - ${ASSETS_TEMP_ARTIFACTS_LOCATION}:/tmp/files:ro
     environment:
       TZ: ${TIMEZONE}

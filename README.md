@@ -39,7 +39,7 @@ ASSETS_TEMP_ARTIFACTS_LOCATION=
 
 CMS_APP_KEYS=
 CMS_API_TOKEN_SALT=
-CMS_ADMIN_JWT_TOKEN=
+CMS_ADMIN_JWT_SECRET=
 CMS_TRANSFER_TOKEN_SALT=
 CMS_JWT_SECRET=
 
@@ -61,7 +61,7 @@ WEB_CMS_URL=
 | `ASSETS_TEMP_ARTIFACTS_LOCATION` | The absolute path in the host machine where the artifacts (for example, search exports) are located.                                                                                                                | `/home/user/assets/artifacts`   |
 | `CMS_APP_KEYS`                   | The app keys used by Strapi. You can make up these secrets yourself.                                                                                                                                                | `"toBeModified1,toBeModified2"` |
 | `CMS_API_TOKEN_SALT`             | The API token salt used by Strapi. You can make up this secret yourself.                                                                                                                                            | `tobemodified`                  |
-| `CMS_ADMIN_JWT_TOKEN`            | The admin JWT token used by Strapi. You can make up this secret yourself.                                                                                                                                           | `tobemodified`                  |
+| `CMS_ADMIN_JWT_SECRET`           | The admin JWT token used by Strapi. You can make up this secret yourself.                                                                                                                                           | `tobemodified`                  |
 | `CMS_TRANSFER_TOKEN_SALT`        | The transfer token salt used by Strapi. You can make up this secret yourself.                                                                                                                                       | `tobemodified`                  |
 | `CMS_JWT_SECRET`                 | The JWT secret used by Strapi. You can make up this secret yourself.                                                                                                                                                | `tobemodified`                  |
 | `WEB_PUBLIC_URL`                 | The public URL from which the web application is accessible from.                                                                                                                                                   | `https://starpepweb.com`        |

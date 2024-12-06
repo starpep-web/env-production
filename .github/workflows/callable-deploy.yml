@@ -15,5 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Placeholder
-        run: echo "DEPLOY"
+      - name: Update Deployment
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOYMENT_SSH_HOST }}
+          port: ${{ secrets.DEPLOYMENT_SSH_PORT }}
+          key: ${{ secrets.DEPLOYMENT_SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/services/starpep-web/
+            docker compose rm -fs
+            docker compose pull
+            docker compose up -d

@@ -20,6 +20,7 @@ jobs:
         with:
           host: ${{ secrets.DEPLOYMENT_SSH_HOST }}
           port: ${{ secrets.DEPLOYMENT_SSH_PORT }}
+          username: ${{ secrets.DEPLOYMENT_SSH_USERNAME }}
           key: ${{ secrets.DEPLOYMENT_SSH_PRIVATE_KEY }}
           script: |
             cd ~/services/starpep-web/

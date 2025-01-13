@@ -34,6 +34,8 @@ DOMAIN_FILES_SERVER=
 DOMAIN_CMS=
 DOMAIN_WEB=
 
+SHARED_INTERNAL_SECRET=
+
 ASSETS_FILES_LOCATION=
 ASSETS_TEMP_ARTIFACTS_LOCATION=
 
@@ -57,6 +59,7 @@ WEB_CMS_URL=
 | `DOMAIN_FILES_SERVER`            | The domain from which the `static-file-server` service is accessible from.                                                                                                                                          | `dl.starpepweb.org`             |
 | `DOMAIN_CMS`                     | The domain from which the Strapi CMS is accessible from.                                                                                                                                                            | `cms.starpepweb.org`            |
 | `DOMAIN_WEB`                     | The domain from which the main application is accessible from.                                                                                                                                                      | `starpepweb.org`                |
+| `SHARED_INTERNAL_SECRET`         | A secret value set by you to be used as a secret for internal messaging between services.                                                                                                                           | `SOME_SECRET_VALUE`             |
 | `ASSETS_FILES_LOCATION`          | The absolute path in the host machine where the [assets](https://github.com/starpep-web/assets) are located.                                                                                                        | `/home/user/assets/files`       |
 | `ASSETS_TEMP_ARTIFACTS_LOCATION` | The absolute path in the host machine where the artifacts (for example, search exports) are located.                                                                                                                | `/home/user/assets/artifacts`   |
 | `CMS_APP_KEYS`                   | The app keys used by Strapi. You can make up these secrets yourself.                                                                                                                                                | `"toBeModified1,toBeModified2"` |

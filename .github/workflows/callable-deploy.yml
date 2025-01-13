@@ -25,5 +25,6 @@ jobs:
           script: |
             cd ~/services/starpep-web/
             docker compose rm -fs
+            git pull
             docker compose pull
             docker compose up -d

@@ -29,6 +29,7 @@ TIMEZONE=America/Guayaquil
 
 CLOUDFLARE_TUNNEL_TOKEN=
 
+DOMAIN_PORTAINER=
 DOMAIN_PROXY=
 DOMAIN_FILES_SERVER=
 DOMAIN_CMS=
@@ -55,6 +56,7 @@ WEB_CMS_URL=
 |----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
 | `TIMEZONE`                       | The UNIX timezone to use across services.                                                                                                                                                                           | `America/Guayaquil`             |
 | `CLOUDFLARE_TUNNEL_TOKEN`        | The Cloudflare tunnel token acquired when creating a new tunnel in [Zero Trust Dashboard](http://one.dash.cloudflare.com).                                                                                          | `JWT_TOKEN_HERE`                |
+| `DOMAIN_PORTAINER`               | The domain from which the Portainer instance is accessible from.                                                                                                                                                    | `docker.starpepweb.org`         |
 | `DOMAIN_PROXY`                   | The domain from which the Traefik proxy dashboard is accessible from.                                                                                                                                               | `proxy.starpepweb.org`          |
 | `DOMAIN_FILES_SERVER`            | The domain from which the `static-file-server` service is accessible from.                                                                                                                                          | `dl.starpepweb.org`             |
 | `DOMAIN_CMS`                     | The domain from which the Strapi CMS is accessible from.                                                                                                                                                            | `cms.starpepweb.org`            |
